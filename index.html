@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMCY Frame Decoder - Elmo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 EMCY Frame Decoder</h1>
+            <p class="subtitle">Расшифровка кодов ошибок Elmo</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <label for="emcyInput">Введите EMCY код (HEX, до 4 байт):</label>
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="emcyInput" 
+                        placeholder="Например: 10002300"
+                        maxlength="8"
+                        pattern="[0-9A-Fa-f]*"
+                    >
+                    <button id="decodeBtn" class="btn-primary">Дешифровать</button>
+                </div>
+                <small class="hint">Формат: до 8 шестнадцатеричных символов (0-9, A-F)</small>
+            </div>
+
+            <div id="result" class="result-section hidden">
+                <h2>Результат расшифровки:</h2>
+                <div class="result-card">
+                    <div class="result-item">
+                        <strong>Error Code (младшие 2 байта):</strong>
+                        <span id="errorCode"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>EMCY Name:</strong>
+                        <span id="emcyName" class="highlight"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Elmo Error Code (старший байт):</strong>
+                        <span id="elmoErrorCode"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Elmo Error Description:</strong>
+                        <span id="elmoDescription" class="highlight"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error" class="error-section hidden">
+                <p id="errorMessage"></p>
+            </div>
+        </main>
+
+        <footer>
+   
+        </footer>
+    </div>
+
+    <script src="decoder.js"></script>
+</body>
+</html>
