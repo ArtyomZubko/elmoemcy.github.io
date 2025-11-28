@@ -15,18 +15,26 @@
 
         <main>
             <div class="input-section">
-                <label for="emcyInput">Введите EMCY код (HEX, до 4 байт):</label>
+                <label for="emcyInput">Введите EMCY код (до 4 байт):</label>
                 <div class="input-group">
                     <input 
                         type="text" 
                         id="emcyInput" 
                         placeholder="Например: 10002300"
-                        maxlength="8"
-                        pattern="[0-9A-Fa-f]*"
                     >
                     <button id="decodeBtn" class="btn-primary">Дешифровать</button>
                 </div>
-                <small class="hint">Формат: до 8 шестнадцатеричных символов (0-9, A-F)</small>
+                <div class="format-selector">
+                    <label class="checkbox-label">
+                        <input type="radio" name="format" id="formatHex" value="hex" checked>
+                        <span>HEX формат</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="radio" name="format" id="formatDec" value="dec">
+                        <span>DEC формат</span>
+                    </label>
+                </div>
+                <small class="hint" id="formatHint">Формат: до 8 шестнадцатеричных символов (0-9, A-F)</small>
             </div>
 
             <div id="result" class="result-section hidden">

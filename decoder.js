@@ -32,7 +32,7 @@ const emcyErrorCodes = {
 
 // Таблица Elmo Error Codes (старший байт)
 const elmoErrorCodes = {
-    0x0: "Дополнительный код ошибки отсутсвует",
+    0x0: "Дополнительный код ошибки отсутствует",
     0x1: "Will not be updated",
     0x2: "Bad command",
     0x3: "Bad index",
@@ -199,6 +199,9 @@ const elmoErrorCodes = {
 // DOM элементы
 const emcyInput = document.getElementById('emcyInput');
 const decodeBtn = document.getElementById('decodeBtn');
+const formatHex = document.getElementById('formatHex');
+const formatDec = document.getElementById('formatDec');
+const formatHint = document.getElementById('formatHint');
 const resultSection = document.getElementById('result');
 const errorSection = document.getElementById('error');
 const errorCodeEl = document.getElementById('errorCode');
@@ -226,36 +229,50 @@ function showResult(errorCode, emcyName, elmoErrorCode, elmoDescription) {
 }
 
 // Функция декодирования EMCY фрейма
-function decodeEMCY(hexString) {
+function decodeEMCY(input) {
     // Валидация входных данных
-    if (!hexString || hexString.trim() === '') {
+    if (!input || input.trim() === '') {
         throw new Error('Введите EMCY код');
     }
     
-    // Удаляем пробелы и приводим к верхнему регистру
-    hexString = hexString.trim().toUpperCase();
+    input = input.trim().toUpperCase();
+    const isHexFormat = formatHex.checked;
+    let fullCode;
     
-    // Проверка на валидность hex строки
-    if (!/^[0-9A-F]+$/.test(hexString)) {
-        throw new Error('Неверный формат. Используйте только шестнадцатеричные символы (0-9, A-F)');
+    if (isHexFormat) {
+        // Проверка на валидность hex строки
+        if (!/^[0-9A-F]+$/.test(input)) {
+            throw new Error('Неверный формат. Используйте только шестнадцатеричные символы (0-9, A-F)');
+        }
+        
+        // Проверка длины (не более 4 байт = 8 символов)
+        if (input.length > 8) {
+            throw new Error('EMCY код не может быть длиннее 4 байт (8 hex символов)');
+        }
+        
+        // Дополняем нулями слева до 8 символов (4 байта)
+        input = input.padStart(8, '0');
+        
+        // Парсим hex строку в число
+        fullCode = parseInt(input, 16);
+    } else {
+        // DEC формат
+        if (!/^[0-9]+$/.test(input)) {
+            throw new Error('Неверный формат. Используйте только цифры (0-9)');
+        }
+        
+        fullCode = parseInt(input, 10);
+        
+        // Проверка диапазона (4 байта = 0 до 4294967295)
+        if (fullCode > 0xFFFFFFFF) {
+            throw new Error('EMCY код не может превышать 4294967295 (0xFFFFFFFF)');
+        }
     }
-    
-    // Проверка длины (не более 4 байт = 8 символов)
-    if (hexString.length > 8) {
-        throw new Error('EMCY код не может быть длиннее 4 байт (8 hex символов)');
-    }
-    
-    // Дополняем нулями слева до 8 символов (4 байта)
-    hexString = hexString.padStart(8, '0');
-    
-    // Парсим hex строку в число
-    const fullCode = parseInt(hexString, 16);
     
     // Извлекаем младшие 2 байта (Error Code)
     const errorCode = fullCode & 0xFFFF;
     
     // Извлекаем старший байт (Elmo Error Code)
-    // Для 4-байтового значения старший байт находится в битах 24-31
     const elmoErrorCode = (fullCode >> 24) & 0xFF;
     
     // Ищем описание Error Code
@@ -301,7 +318,31 @@ emcyInput.addEventListener('keypress', (e) => {
     }
 });
 
-// Фильтр ввода - только hex символы
+// Обработчик изменения формата
+function updateInputFormat() {
+    const isHex = formatHex.checked;
+    
+    if (isHex) {
+        emcyInput.placeholder = 'Например: 10002300';
+        formatHint.textContent = 'Формат: до 8 шестнадцатеричных символов (0-9, A-F)';
+    } else {
+        emcyInput.placeholder = 'Например: 268444416';
+        formatHint.textContent = 'Формат: целое число от 0 до 4294967295';
+    }
+    
+    emcyInput.value = '';
+}
+
+formatHex.addEventListener('change', updateInputFormat);
+formatDec.addEventListener('change', updateInputFormat);
+
+// Фильтр ввода
 emcyInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+    const isHex = formatHex.checked;
+    
+    if (isHex) {
+        e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+    } else {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    }
 });
